@@ -1,3 +1,4 @@
+ï»¿#-*- coding:utf-8 -*-
 #include <windows.h>
 #include "strsafe.h"
 #include <math.h>
@@ -9,15 +10,15 @@
 #define MAXPTS 100
 #define PLAYING_TIMERID 1
 
-//Ì°³ÔÉß
+//è´ªåƒè›‡
 struct Snake { POINT pts[MAXPTS];int size, dx, dy, R, G, B; };
 Snake snake;
-//ÓÎÏ·ÇøÓò
+//æ¸¸æˆåŒºåŸŸ
 int xside = 100, yside = 90;
 int xdivisions = 20, ydivisions = 18;
 int xlength = 2 * xside, ylength = 2 * yside;
-int block = xlength / xdivisions; //ÉèÖÃ²ÎÊıÊ±È·±£ÄÜÕû³ıÇÒxblock=yblockÇÒblockÎªÅ¼Êı
-int r = block / 2;//Éß½Ú¿í¶È
+int block = xlength / xdivisions; //è®¾ç½®å‚æ•°æ—¶ç¡®ä¿èƒ½æ•´é™¤ä¸”xblock=yblockä¸”blockä¸ºå¶æ•°
+int r = block / 2;//è›‡èŠ‚å®½åº¦
 int snakespeed = 500;//500ms
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -42,13 +43,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 	if (!RegisterClass(&wndclass))
 	{
-		MessageBox(NULL, TEXT("Õâ¸ö³ÌĞòĞèÒªÔÚ windows NT ²ÅÄÜÔËĞĞ!"), szAppName, MB_ICONERROR);
+		MessageBox(NULL, TEXT("è¿™ä¸ªç¨‹åºéœ€è¦åœ¨ windows NT æ‰èƒ½è¿è¡Œ!"), szAppName, MB_ICONERROR);
 		return 0;
 	}
 
 	hwnd = CreateWindow(
 		szAppName,
-		TEXT("SCU¹¤×÷ÊÒ"),
+		TEXT("SCUå·¥ä½œå®¤"),
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -60,7 +61,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		NULL
 	);
 
-	//³õÊ¼»¯Ì°³ÔÉß
+	//åˆå§‹åŒ–è´ªåƒè›‡
 	snake.size = 2;
 	snake.dx = 1, snake.dy = 0;
 	snake.pts[0].x = -xside + 3 * block - block / 2;
@@ -124,10 +125,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return 0;
 
 	case WM_TIMER:
-		//Ê³ÎïµÄ´¦Àí
+		//é£Ÿç‰©çš„å¤„ç†
 		struct Food{int x,y;};
 		Food food;
-		//¸ü¸ÄÉßµÄÎ»ÖÃ
+		//æ›´æ”¹è›‡çš„ä½ç½®
 		int lastx=snake.pts[snake.size].x;
 		int lasty=snake.pts[snake.size].y;
 		for (i = snake.size - 1; i > 0; i--)
@@ -137,17 +138,43 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		snake.pts[0].x += snake.dx * block;
 		snake.pts[0].y += snake.dy * block;
-		//Èç¹ûÉßÍ·ÔÚÊ³Îï´¦»ò,¸ü¸ÄÉßµÄsize,ÖØĞÂÉú³ÉÊ³Îï
+		//å¦‚æœè›‡å¤´åœ¨é£Ÿç‰©å¤„æˆ–,æ›´æ”¹è›‡çš„size,é‡æ–°ç”Ÿæˆé£Ÿç‰©
 		if(snake.pts[0].x==food.x && snake.pts[0].y==food.y)
 		{
 			snake.size++;
 			snake.pts[snake.size].x=lastx;
 			snake.pts[snake.size].y=lasty;
 		}
-		
-		//ËÀÍöÅĞ¶Ï(Åöµ½±ß½ç/ÉßÉí/ÕÏ°­Îï)
-
-		InvalidateRect(hwnd, NULL, TRUE);//·¢ËÍÖØ»­´°¿ÚµÄÏûÏ¢
+		srand((unsigned)time(NULL));
+		int tempb=1;
+		while(tempb)
+		{
+			food.x=(rand()%xdivisions-xdivisions/2)*block;
+			food.y=(rand()%ydivisions-ydivisions/2)*block;
+			for(i=1;i<=snake.size;i++)
+			{
+				if(food.x==snake.pts[i].x && food.y==snake.pts[i].y)
+				{
+					tempb=1;
+					break;
+				}
+				if(i==snake.size) tempb=0;
+			}
+		}
+		//æ­»äº¡åˆ¤æ–­(ç¢°åˆ°è¾¹ç•Œ/è›‡èº«/éšœç¢ç‰©)
+		int flagx=snake.pts[0].x;
+		int flagy=snake.pts[0].y;
+		bool invalid=false;
+		if(abs(flagx)>=xside || abs(flagy)>=yside)  invalid=true;//å‘é€é‡ç”»çª—å£çš„æ¶ˆæ¯
+		for(i=1;i<=snake.size;i++)
+		{
+			if(snake.pts[i].x==flagx+block*(snake.dx) && snake.pts[i].y==flagy+block*(snake.dy))  invalid=true;
+		}
+		if(invalid==true)
+		{
+			invalid=false;
+			InvalidateRect(hwnd, NULL, TRUE);//å‘é€é‡ç”»çª—å£çš„æ¶ˆæ¯
+		}
 		return 0;
 
 	case WM_PAINT:
@@ -156,18 +183,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		iMapMode = GetMapMode(hdc);
 		SetMapMode(hdc, MM_ISOTROPIC);
 
-		SetWindowExtEx(hdc, 100, 100, NULL);//´°¿Ú·¶Î§ÉèÎª100£¬100
+		SetWindowExtEx(hdc, 100, 100, NULL);//çª—å£èŒƒå›´è®¾ä¸º100ï¼Œ100
 		SetViewportExtEx(hdc, cxClient / 2, -cyClient / 2, NULL);
 		SetViewportOrgEx(hdc, cxClient / 2, cyClient / 2, NULL);
 
-		//È«¾Ö±³¾°
+		//å…¨å±€èƒŒæ™¯
 
-		//ÓÎÏ·±³¾°
+		//æ¸¸æˆèƒŒæ™¯
 
-		//ÓÎÏ·±ß½ç
+		//æ¸¸æˆè¾¹ç•Œ
 		Rectangle(hdc, -xside, yside, xside, -yside);
-		//ÓÎÏ··½¸ñ
-		hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 0));//Ä¬ÈÏÌõ¼şÏÂÌî³ä·ÇÊµÏßµÄÊÇ°×É«
+		//æ¸¸æˆæ–¹æ ¼
+		hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 0));//é»˜è®¤æ¡ä»¶ä¸‹å¡«å……éå®çº¿çš„æ˜¯ç™½è‰²
 		hOldPen = SelectObject(hdc, hPen);
 		SetBkMode(hdc, TRANSPARENT);
 		for (i = 1; i < xdivisions; i++)
@@ -182,13 +209,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			LineTo(hdc, -xside, -yside + block * i);
 		}
 		SelectObject(hdc, hOldPen);
-		//Ê³Îï
-			
-		//Ì°³ÔÉß
-			//Ò»²¿·Ö³õÊ¼»¯ÔİÊ±·ÅÔÚswitchÍâÃæ
+		//é£Ÿç‰©
+		
+		//è´ªåƒè›‡
+			//ä¸€éƒ¨åˆ†åˆå§‹åŒ–æš‚æ—¶æ”¾åœ¨switchå¤–é¢
 		snake.R = 255, snake.G = 0, snake.B = 0;
 		//hPen = CreatePen(PS_SOLID, 1, RGB(snake.R, snake.G, snake.B));
-		//SelectObject(hdc, hPen);//ÈôÈ¡Ïû×¢ÊÍÔòÕâÁ½ĞĞ°Ñ±ß¿òÒ²±äÎªÉßµÄÑÕÉ«
+		//SelectObject(hdc, hPen);//è‹¥å–æ¶ˆæ³¨é‡Šåˆ™è¿™ä¸¤è¡ŒæŠŠè¾¹æ¡†ä¹Ÿå˜ä¸ºè›‡çš„é¢œè‰²
 		hBrush = CreateSolidBrush(RGB(snake.R, snake.G, snake.B));
 		SelectObject(hdc, hBrush);
 
@@ -203,7 +230,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return 0;
 
 	case WM_CLOSE:
-		if (MessageBox(hwnd, TEXT("È·ÈÏÒª¹Ø±Õ´°¿ÚÂğ?"), TEXT("ÇëÈ·ÈÏ"), MB_YESNO) == IDYES)
+		if (MessageBox(hwnd, TEXT("ç¡®è®¤è¦å…³é—­çª—å£å—?"), TEXT("è¯·ç¡®è®¤"), MB_YESNO) == IDYES)
 			DestroyWindow(hwnd);
 		else return 0;
 
